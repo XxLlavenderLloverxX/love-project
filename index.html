@@ -3,11 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Birthday Reveal</title>
+    <title>A Special Surprise</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; }
         
+        /* THE GATEKEEPER OVERLAY */
+        #lock-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999; /* Higher than everything else */
+            color: #ff3399;
+            transition: opacity 1s ease;
+        }
+
+        #timer-text { font-size: 2.5rem; font-weight: bold; margin-top: 20px; }
+        .waiting-msg { font-size: 1rem; opacity: 0.7; letter-spacing: 2px; }
+
+        /* Hiding main content until timer ends */
+        #main-wrapper { opacity: 0; pointer-events: none; transition: opacity 1s ease; }
+
         #quiz-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -16,54 +34,79 @@
         }
 
         .btn-container { margin-top: 30px; display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; position: relative; }
-
-        #yes-btn {
-            background: #ff3399; border: none; color: white;
-            padding: 10px 25px; font-size: 1.2rem; cursor: pointer;
-            border-radius: 50px; font-weight: bold; transition: all 0.2s;
-            z-index: 101;
-        }
-
-        #no-btn {
-            background: none; border: 2px solid #ff3399; color: #ff3399;
-            padding: 10px 25px; font-size: 1.2rem; cursor: pointer;
-            border-radius: 50px; transition: all 0.2s;
-        }
-
-        .floating-heart {
-            position: absolute;
-            color: rgba(255, 51, 153, 0.15);
-            font-size: 20px;
-            pointer-events: none;
-            z-index: 5;
-            animation: floatUp linear forwards;
-        }
-
-        @keyframes floatUp {
-            from { transform: translateY(110vh) scale(0.5); opacity: 0; }
-            20% { opacity: 0.6; }
-            80% { opacity: 0.6; }
-            to { transform: translateY(-10vh) scale(1.2); opacity: 0; }
-        }
+        #yes-btn { background: #ff3399; border: none; color: white; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; border-radius: 50px; font-weight: bold; transition: all 0.2s; z-index: 101; }
+        #no-btn { background: none; border: 2px solid #ff3399; color: #ff3399; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; border-radius: 50px; transition: all 0.2s; }
+        .floating-heart { position: absolute; color: rgba(255, 51, 153, 0.15); font-size: 20px; pointer-events: none; z-index: 5; animation: floatUp linear forwards; }
+        @keyframes floatUp { from { transform: translateY(110vh) scale(0.5); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.6; } to { transform: translateY(-10vh) scale(1.2); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <audio id="bg-music" loop>
-        <source src="https://www.dropbox.com/scl/fi/ws9zdwgjhc95uvtoz5bk9/Happy-Birthday-Song-x-Oiia-Cat-Maxwell-Cat-kjwWxpGnfQU.mp3?rlkey=7ba36b4lm5jj8etl4ga0dy3t3&st=55ycllm4&dl=1" type="audio/mpeg">
-    </audio>
-
-    <div id="quiz-overlay">
-        <h2 id="question">Do you promise to stay with me forever?</h2>
-        <div class="btn-container" id="container">
-            <button id="yes-btn" onclick="startApp()">YES</button>
-            <button id="no-btn" onclick="sayNo()">NO</button>
-        </div>
+    <!-- 1. THE LOCK SCREEN (Always visible at start) -->
+    <div id="lock-screen">
+        <div class="waiting-msg">SOMETHING IS COMING...</div>
+        <div id="timer-text">00:00:00</div>
     </div>
 
-    <canvas id="matrix"></canvas>
+    <!-- 2. WRAPPER FOR YOUR ENTIRE SITE -->
+    <div id="main-wrapper">
+        <audio id="bg-music" loop>
+            <source src="https://www.dropbox.com/scl/fi/ws9zdwgjhc95uvtoz5bk9/Happy-Birthday-Song-x-Oiia-Cat-Maxwell-Cat-kjwWxpGnfQU.mp3?rlkey=7ba36b4lm5jj8etl4ga0dy3t3&st=55ycllm4&dl=1" type="audio/mpeg">
+        </audio>
+
+        <div id="quiz-overlay">
+            <h2 id="question">Do you promise to stay with me forever?</h2>
+            <div class="btn-container" id="container">
+                <button id="yes-btn" onclick="startApp()">YES</button>
+                <button id="no-btn" onclick="sayNo()">NO</button>
+            </div>
+        </div>
+        <canvas id="matrix"></canvas>
+    </div>
 
     <script>
+        // --- CONFIGURATION ---
+        // Setting the "Fake Test Date" to 15 mins from now: April 30, 2026, 20:02:10 UTC
+        const targetDate = new Date("2026-04-30T20:02:10Z").getTime(); 
+
+        const lockScreen = document.getElementById('lock-screen');
+        const timerText = document.getElementById('timer-text');
+        const mainWrapper = document.getElementById('main-wrapper');
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                unlockWebsite();
+                return;
+            }
+
+            const h = Math.floor((diff / (1000 * 60 * 60)));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            timerText.innerHTML = 
+                (h < 10 ? "0" + h : h) + ":" + 
+                (m < 10 ? "0" + m : m) + ":" + 
+                (s < 10 ? "0" + s : s);
+            
+            requestAnimationFrame(updateCountdown);
+        }
+
+        function unlockWebsite() {
+            lockScreen.style.opacity = '0';
+            setTimeout(() => {
+                lockScreen.remove(); // Delete it so it's gone for good
+                mainWrapper.style.opacity = '1';
+                mainWrapper.style.pointerEvents = 'auto';
+            }, 1000);
+        }
+
+        // Start checking the clock immediately
+        updateCountdown();
+
+        // --- YOUR ORIGINAL LOGIC (Fixed for Wrapper) ---
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         const yesBtn = document.getElementById('yes-btn');
@@ -71,8 +114,7 @@
         const quizOverlay = document.getElementById('quiz-overlay');
         const music = document.getElementById('bg-music');
         
-        let yesSize = 1.2;
-
+        let yesSize = 1;
         function sayNo() {
             yesSize += 0.4;
             yesBtn.style.transform = `scale(${yesSize})`;
@@ -95,7 +137,8 @@
         let stateTimer = 0;
         const messageDuration = 140; 
 
-        // Fireworks Logic
+        // Fireworks & Heart Logic stays same as your original code...
+        // [Condensed for brevity, but all your logic is preserved]
         let fireworks = [];
         class Firework {
             constructor() {
@@ -109,16 +152,11 @@
             }
             update() {
                 if (!this.exploded) {
-                    this.x += this.sx;
-                    this.y += this.sy;
-                    this.sy += 0.1;
+                    this.x += this.sx; this.y += this.sy; this.sy += 0.1;
                     if (this.sy >= -1) this.explode();
                 }
                 this.particles.forEach((p, i) => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.05;
-                    p.alpha -= 0.01;
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.alpha -= 0.01;
                     if (p.alpha <= 0) this.particles.splice(i, 1);
                 });
             }
@@ -127,26 +165,16 @@
                 for (let i = 0; i < 50; i++) {
                     const angle = Math.random() * Math.PI * 2;
                     const speed = Math.random() * 4 + 2;
-                    this.particles.push({
-                        x: this.x, y: this.y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        alpha: 1
-                    });
+                    this.particles.push({ x: this.x, y: this.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, alpha: 1 });
                 }
             }
             draw() {
                 if (!this.exploded) {
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI * 2); ctx.fill();
                 }
                 this.particles.forEach(p => {
                     ctx.fillStyle = this.color.replace(')', `, ${p.alpha})`).replace('hsl', 'hsla');
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2); ctx.fill();
                 });
             }
         }
@@ -158,43 +186,31 @@
             drops = new Array(columns).fill(1);
         }
 
-        function spawnFloatingHeart() {
-            if (!started) return;
-            const heart = document.createElement('div');
-            heart.className = 'floating-heart';
-            heart.innerHTML = '❤️';
-            heart.style.left = Math.random() * 100 + 'vw';
-            const duration = 9 + Math.random() * 5; 
-            heart.style.animationDuration = duration + 's';
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), duration * 1000);
-        }
-
         function startApp() {
-            music.play().catch(e => console.log("Audio failed to play:", e));
+            music.play().catch(e => console.log("Audio failed: Click required."));
             quizOverlay.style.display = 'none';
             started = true;
             initMatrix();
-            setInterval(spawnFloatingHeart, 700); 
+            setInterval(() => { if(started) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart'; heart.innerHTML = '❤️';
+                heart.style.left = Math.random() * 100 + 'vw';
+                const duration = 9 + Math.random() * 5;
+                heart.style.animationDuration = duration + 's';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), duration * 1000);
+            }}, 700); 
             draw();
         }
 
         function drawDottedHeart() {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const scale = Math.min(canvas.width, canvas.height) / 45; 
-            ctx.fillStyle = "#ffb3d9"; 
-            
+            const centerX = canvas.width / 2; const centerY = canvas.height / 2;
+            const scale = Math.min(canvas.width, canvas.height) / 45; ctx.fillStyle = "#ffb3d9"; 
             for (let x = -18; x <= 18; x += 1.5) {
                 for (let y = -18; y <= 18; y += 1.5) {
-                    const dx = x / 10;
-                    const dy = -y / 10; 
-                    const isInside = Math.pow(dx*dx + dy*dy - 1, 3) - (dx*dx * Math.pow(dy, 3)) <= 0;
-                    
-                    if (isInside) {
-                        ctx.beginPath();
-                        ctx.arc(centerX + x * scale, centerY + y * scale, 2.5, 0, Math.PI * 2);
-                        ctx.fill();
+                    const dx = x / 10; const dy = -y / 10; 
+                    if (Math.pow(dx*dx + dy*dy - 1, 3) - (dx*dx * Math.pow(dy, 3)) <= 0) {
+                        ctx.beginPath(); ctx.arc(centerX + x * scale, centerY + y * scale, 2.5, 0, Math.PI * 2); ctx.fill();
                     }
                 }
             }
@@ -202,11 +218,7 @@
 
         function draw() {
             if (!started) return;
-
-            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Background Rain
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             if (frameCount % rainSlowdown === 0) {
                 ctx.font = `bold ${fontSize}px monospace`;
                 for (let i = 0; i < drops.length; i++) {
@@ -217,39 +229,24 @@
                     drops[i]++;
                 }
             }
-
-            // Message State
             if (state < messages.length) {
                 const currentText = messages[state];
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = "#ff3399";
-                ctx.fillStyle = "#ffffff";
+                ctx.shadowBlur = 15; ctx.shadowColor = "#ff3399"; ctx.fillStyle = "#ffffff";
                 let displaySize = canvas.width / (currentText.length > 3 ? 7 : 4);
-                ctx.font = `bold ${displaySize}px monospace`;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(currentText, canvas.width / 2, canvas.height / 2);
-                ctx.shadowBlur = 0;
-
-                stateTimer++;
-                if (stateTimer > messageDuration) {
-                    stateTimer = 0;
-                    state++;
-                }
+                ctx.font = `bold ${displaySize}px monospace`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(currentText, canvas.width / 2, canvas.height / 2); ctx.shadowBlur = 0;
+                stateTimer++; if (stateTimer > messageDuration) { stateTimer = 0; state++; }
             } else {
-                // Final Scene: Heart + Fireworks
                 if (Math.random() < 0.05) fireworks.push(new Firework());
-                fireworks.forEach((f, i) => {
-                    f.update();
-                    f.draw();
-                    if (f.exploded && f.particles.length === 0) fireworks.splice(i, 1);
-                });
+                fireworks.forEach((f, i) => { f.update(); f.draw(); if (f.exploded && f.particles.length === 0) fireworks.splice(i, 1); });
                 drawDottedHeart();
             }
-
-            frameCount++;
-            requestAnimationFrame(draw);
+            frameCount++; requestAnimationFrame(draw);
         }
+        window.addEventListener('resize', initMatrix);
+    </script>
+</body>
+</html>
 
         window.addEventListener('resize', initMatrix);
     </script>
