@@ -35,6 +35,49 @@
         .btn-container { margin-top: 30px; display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; position: relative; }
         #yes-btn { background: #ff3399; border: none; color: white; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; border-radius: 50px; font-weight: bold; transition: all 0.2s; z-index: 101; }
         #no-btn { background: none; border: 2px solid #ff3399; color: #ff3399; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; border-radius: 50px; transition: all 0.2s; }
+        
+        /* THE PAPER NOTE */
+        #letter-container {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%; max-width: 500px;
+            max-height: 70vh;
+            background: #fdf5e6; 
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 50px rgba(139,69,19,0.1);
+            z-index: 200;
+            display: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+            overflow-y: auto;
+            color: #4b2c20;
+            line-height: 1.6;
+            text-align: left;
+            border: 1px solid #d2b48c;
+            scrollbar-width: thin;
+            scrollbar-color: #d2b48c #fdf5e6;
+        }
+
+        .letter-text { font-size: 1.1rem; white-space: pre-wrap; margin-bottom: 30px; }
+
+        #final-heart-btn {
+            display: block;
+            margin: 20px auto;
+            background: none;
+            border: none;
+            font-size: 3rem;
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
         .floating-heart { position: absolute; color: rgba(255, 51, 153, 0.15); font-size: 20px; pointer-events: none; z-index: 5; animation: floatUp linear forwards; }
         @keyframes floatUp { from { transform: translateY(110vh) scale(0.5); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.6; } to { transform: translateY(-10vh) scale(1.2); opacity: 0; } }
     </style>
@@ -58,51 +101,42 @@
                 <button id="no-btn" onclick="sayNo()">NO</button>
             </div>
         </div>
+
+        <div id="letter-container">
+            <div class="letter-text">you probably have absolutely no idea how much you impacted my life. i mean.. it's almost hard to believe that i would fall for anyone at all- i never thought i would find someone i want to spend my days with yet here you are a living example.. =-= the fact i just wish to text you everyday, finish off everything i have just to have free time with you, cherish every conversation we had together, every movie night and laughs, every time we play together -even if we haven't for awhile now but stilll- that also includes our phone calls together, yes i know we only ever called twice but that first call together meant so much to me. what i loved most is your laugh and how you would almost smile- i adored it so much. your voice is just so unique and lovely, i love listening to you even if i personally don't talk much but hearing your voice just really calms me. its stupid but.. your nicknames for me, sure some are a bit embarrassing for me still, but i still love it so much nonetheless. it assures me that you still love me and for some reason.. chose me. and i just want you to know that you're all i ever wish for as well and choose to be with forever. inshallah. it's almost funny how similar we are, i personally couldn't believe i would find someone so close, loving animations more than acting. horror and gore being both our favorite genres in real movies. we both love gaming. your taste in music is just so similar to mine which is perfect so we can listen to the same songs together hehe. somehow too you love drawing, clearly so much better than me too, its really adorable and i love saving them and see how well you are at drawing. your love for dark romance as well- its kinda scary to be honest, considering we both love dark romance, who know what might happen- but i hope, and you better not, nothing funny happens in future. =3= finally.. i just wish to say.. I love you. so deeply. more than you think. i love how patient you can be for me. i love how much you make me laugh everyday. i love how obedient you can be hehe (sometimes at least). i love how similar we are and that you complete me, how you're just all i ever want. cause you're all i've been dreaming of. so will you just say this is just another song about love? hehe​</div>
+            <button id="final-heart-btn" onclick="window.location.href='https://xxllavenderlloverxx.github.io/ForMyFavPerson/'">❤️</button>
+        </div>
+
         <canvas id="matrix"></canvas>
     </div>
 
     <script>
-        // --- FIXED CONFIGURATION FOR TEST ---
-        // Ends exactly at 8:02:00 PM (17:02:00 UTC)
-        const targetDate = new Date("2026-04-30T17:02:00Z").getTime(); 
+        // --- TEST TIMER: 8:15:00 PM (17:15:00 UTC) ---
+        const targetDate = new Date("2026-04-30T17:15:00Z").getTime(); 
 
         const lockScreen = document.getElementById('lock-screen');
         const timerText = document.getElementById('timer-text');
         const mainWrapper = document.getElementById('main-wrapper');
+        const letterBox = document.getElementById('letter-container');
 
         function updateCountdown() {
             const now = new Date().getTime();
             const diff = targetDate - now;
-
-            if (diff <= 0) {
-                unlockWebsite();
-                return;
-            }
-
+            if (diff <= 0) { unlockWebsite(); return; }
             const h = Math.floor((diff / (1000 * 60 * 60)));
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            timerText.innerHTML = 
-                (h < 10 ? "0" + h : h) + ":" + 
-                (m < 10 ? "0" + m : m) + ":" + 
-                (s < 10 ? "0" + s : s);
-            
+            timerText.innerHTML = (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
             requestAnimationFrame(updateCountdown);
         }
 
         function unlockWebsite() {
             lockScreen.style.opacity = '0';
-            setTimeout(() => {
-                lockScreen.remove();
-                mainWrapper.style.opacity = '1';
-                mainWrapper.style.pointerEvents = 'auto';
-            }, 1000);
+            setTimeout(() => { lockScreen.remove(); mainWrapper.style.opacity = '1'; mainWrapper.style.pointerEvents = 'auto'; }, 1000);
         }
 
         updateCountdown();
 
-        // --- INTERACTIVE LOGIC ---
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         const yesBtn = document.getElementById('yes-btn');
@@ -131,6 +165,7 @@
         let state = 0;
         let stateTimer = 0;
         const messageDuration = 140; 
+        let letterTriggered = false;
 
         let fireworks = [];
         class Firework {
@@ -209,9 +244,17 @@
             }
         }
 
+        function showLetter() {
+            if (letterTriggered) return;
+            letterTriggered = true;
+            letterBox.style.display = 'block';
+            setTimeout(() => { letterBox.style.opacity = '1'; }, 100);
+        }
+
         function draw() {
             if (!started) return;
             ctx.fillStyle = "rgba(0, 0, 0, 0.1)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             if (frameCount % rainSlowdown === 0) {
                 ctx.font = `bold ${fontSize}px monospace`;
                 for (let i = 0; i < drops.length; i++) {
@@ -222,6 +265,7 @@
                     drops[i]++;
                 }
             }
+
             if (state < messages.length) {
                 const currentText = messages[state];
                 ctx.shadowBlur = 15; ctx.shadowColor = "#ff3399"; ctx.fillStyle = "#ffffff";
@@ -233,6 +277,12 @@
                 if (Math.random() < 0.05) fireworks.push(new Firework());
                 fireworks.forEach((f, i) => { f.update(); f.draw(); if (f.exploded && f.particles.length === 0) fireworks.splice(i, 1); });
                 drawDottedHeart();
+                
+                if (stateTimer < 500) { 
+                    stateTimer++; 
+                } else {
+                    showLetter();
+                }
             }
             frameCount++; requestAnimationFrame(draw);
         }
