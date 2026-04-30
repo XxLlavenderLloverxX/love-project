@@ -63,8 +63,8 @@
 
     <script>
         // --- FIXED CONFIGURATION FOR TEST ---
-        // Sets target to exactly 15 minutes from now
-        const targetDate = new Date().getTime() + (15 * 60 * 1000); 
+        // Ends exactly at 8:02:00 PM (17:02:00 UTC)
+        const targetDate = new Date("2026-04-30T17:02:00Z").getTime(); 
 
         const lockScreen = document.getElementById('lock-screen');
         const timerText = document.getElementById('timer-text');
@@ -102,7 +102,7 @@
 
         updateCountdown();
 
-        // --- ORIGINAL LOGIC ---
+        // --- INTERACTIVE LOGIC ---
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         const yesBtn = document.getElementById('yes-btn');
