@@ -15,7 +15,7 @@
             background: #000;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            z-index: 9999; /* Higher than everything else */
+            z-index: 9999;
             color: #ff3399;
             transition: opacity 1s ease;
         }
@@ -23,7 +23,6 @@
         #timer-text { font-size: 2.5rem; font-weight: bold; margin-top: 20px; }
         .waiting-msg { font-size: 1rem; opacity: 0.7; letter-spacing: 2px; }
 
-        /* Hiding main content until timer ends */
         #main-wrapper { opacity: 0; pointer-events: none; transition: opacity 1s ease; }
 
         #quiz-overlay {
@@ -42,13 +41,11 @@
 </head>
 <body>
 
-    <!-- 1. THE LOCK SCREEN (Always visible at start) -->
     <div id="lock-screen">
-        <div class="waiting-msg">SOMETHING IS COMING...</div>
+        <div class="waiting-msg">SOMETHING IS COMING...HEHE</div>
         <div id="timer-text">00:00:00</div>
     </div>
 
-    <!-- 2. WRAPPER FOR YOUR ENTIRE SITE -->
     <div id="main-wrapper">
         <audio id="bg-music" loop>
             <source src="https://www.dropbox.com/scl/fi/ws9zdwgjhc95uvtoz5bk9/Happy-Birthday-Song-x-Oiia-Cat-Maxwell-Cat-kjwWxpGnfQU.mp3?rlkey=7ba36b4lm5jj8etl4ga0dy3t3&st=55ycllm4&dl=1" type="audio/mpeg">
@@ -65,9 +62,9 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        // Setting the "Fake Test Date" to 15 mins from now: April 30, 2026, 20:02:10 UTC
-        const targetDate = new Date("2026-04-30T20:02:10Z").getTime(); 
+        // --- FIXED CONFIGURATION FOR TEST ---
+        // Sets target to exactly 15 minutes from now
+        const targetDate = new Date().getTime() + (15 * 60 * 1000); 
 
         const lockScreen = document.getElementById('lock-screen');
         const timerText = document.getElementById('timer-text');
@@ -97,16 +94,15 @@
         function unlockWebsite() {
             lockScreen.style.opacity = '0';
             setTimeout(() => {
-                lockScreen.remove(); // Delete it so it's gone for good
+                lockScreen.remove();
                 mainWrapper.style.opacity = '1';
                 mainWrapper.style.pointerEvents = 'auto';
             }, 1000);
         }
 
-        // Start checking the clock immediately
         updateCountdown();
 
-        // --- YOUR ORIGINAL LOGIC (Fixed for Wrapper) ---
+        // --- ORIGINAL LOGIC ---
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         const yesBtn = document.getElementById('yes-btn');
@@ -131,14 +127,11 @@
         let columns, drops;
         let frameCount = 0;
         const rainSlowdown = 4; 
-        
-        const messages = ["3", "2", "1", "HAPPY", "BIRTHDAY", "TO", "YOU"];
+        const messages = ["3", "2", "1", "HAPPY", "BIRTHDAY", "TO", "YOU~"];
         let state = 0;
         let stateTimer = 0;
         const messageDuration = 140; 
 
-        // Fireworks & Heart Logic stays same as your original code...
-        // [Condensed for brevity, but all your logic is preserved]
         let fireworks = [];
         class Firework {
             constructor() {
@@ -187,7 +180,7 @@
         }
 
         function startApp() {
-            music.play().catch(e => console.log("Audio failed: Click required."));
+            music.play().catch(e => console.log("Audio failed."));
             quizOverlay.style.display = 'none';
             started = true;
             initMatrix();
@@ -243,11 +236,6 @@
             }
             frameCount++; requestAnimationFrame(draw);
         }
-        window.addEventListener('resize', initMatrix);
-    </script>
-</body>
-</html>
-
         window.addEventListener('resize', initMatrix);
     </script>
 </body>
