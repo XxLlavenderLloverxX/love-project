@@ -27,7 +27,7 @@
         #quiz-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #000; z-index: 100; color: #ff3399; text-align: center; padding: 20px;
+            background: #000; z-index: 1000; color: #ff3399; text-align: center; padding: 20px;
             box-sizing: border-box;
         }
 
@@ -35,110 +35,155 @@
         #yes-btn { background: #ff3399; border: none; color: white; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; border-radius: 50px; font-weight: bold; transition: all 0.2s; z-index: 101; }
         #no-btn { background: none; border: 2px solid #ff3399; color: #ff3399; padding: 10px 25px; font-size: 1.2rem; cursor: pointer; border-radius: 50px; transition: all 0.2s; }
         
-        /* --- THE AGED & STAINED PARCHMENT --- */
-        #letter-container { 
-            position: fixed; 
-            top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); 
-            width: 85%; max-width: 550px; 
-            max-height: 80vh; 
+        /* --- ENVELOPE STRUCTURE --- */
+        #envelope-wrapper {
+            position: fixed;
+            top: 55%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%; max-width: 450px;
+            height: 300px;
+            z-index: 200;
+            display: none;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            perspective: 1000px;
+        }
 
+        .envelope {
+            position: relative;
+            width: 100%; height: 100%;
+            background: #8b5a2b;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        .flap {
+            position: absolute;
+            top: 0; width: 0; height: 0;
+            border-left: 225px solid transparent; 
+            border-right: 225px solid transparent;
+            border-top: 150px solid #a67c52;
+            transform-origin: top;
+            transition: transform 0.8s ease;
+            z-index: 4;
+        }
+
+        @media (max-width: 450px) {
+            .flap {
+                border-left-width: 45vw;
+                border-right-width: 45vw;
+            }
+        }
+
+        .envelope::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 100%;
+            background: #8b5a2b;
+            clip-path: polygon(0 0, 0% 100%, 100% 100%, 100% 0, 50% 50%);
+            z-index: 3;
+        }
+
+        /* --- THE PARCHMENT --- */
+        #letter-container { 
+            position: absolute;
+            bottom: 10px; left: 5%;
+            width: 90%; 
+            height: 280px; 
             background-color: #c4a474; 
             background-image: 
                 radial-gradient(circle at 50% 50%, rgba(77, 46, 25, 0.4) 0%, rgba(196, 164, 116, 0.1) 40%, transparent 70%),
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4.5' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E"),
                 linear-gradient(to bottom, rgba(40,20,10,0.2), transparent 20%, transparent 80%, rgba(40,20,10,0.2));
-            
-            padding: 65px 45px; 
-
-            clip-path: polygon(
-                2% 3%, 15% 5%, 30% 1%, 50% 4%, 75% 0%, 98% 4%, 
-                97% 30%, 100% 60%, 95% 95%, 70% 98%, 40% 95%, 15% 100%, 2% 95%, 
-                5% 50%, 0% 15%
-            ); 
-
-            box-shadow: 
-                40px 40px 100px rgba(0,0,0,0.9), 
-                inset 0 0 70px rgba(35, 15, 5, 1), 
-                inset 0 0 120px rgba(90, 50, 20, 0.5);
-            
-            z-index: 200; 
-            display: none; 
-            opacity: 0; 
-            transition: opacity 2.5s ease; 
-            overflow-y: auto; 
-
+            padding: 30px; 
+            box-sizing: border-box;
+            clip-path: polygon(2% 3%, 15% 5%, 30% 1%, 50% 4%, 75% 0%, 98% 4%, 97% 30%, 100% 60%, 95% 95%, 70% 98%, 40% 95%, 15% 100%, 2% 95%, 5% 50%, 0% 15%); 
+            box-shadow: inset 0 0 70px rgba(35, 15, 5, 0.8), inset 0 0 120px rgba(90, 50, 20, 0.3);
+            transition: all 1s ease 0.5s;
+            overflow-y: hidden;
+            z-index: 2; 
             color: #1a0f0a; 
-            line-height: 1.8; 
-            text-align: left; 
+            text-align: left;
+            
+            /* --- HIDE SCROLLBARS --- */
+            -ms-overflow-style: none;  /* IE/Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* HIDE SCROLLBAR FOR CHROME/SAFARI */
+        #letter-container::-webkit-scrollbar {
+            display: none;
         }
 
         .letter-text { 
             font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; 
-            font-size: 1.15rem; 
+            font-size: 1.1rem; 
             font-style: italic; 
             white-space: pre-wrap; 
-            margin-bottom: 30px; 
             font-weight: 600;
-            filter: drop-shadow(1px 1px 0.5px rgba(0,0,0,0.5));
-            opacity: 0.95;
+            opacity: 0;
+            transition: opacity 1s ease 1.2s;
         }
 
-        #letter-container::-webkit-scrollbar { width: 6px; } 
-        #letter-container::-webkit-scrollbar-track { background: transparent; } 
-        #letter-container::-webkit-scrollbar-thumb { background: #2b1910; border-radius: 10px; }
-
-        /* --- UPDATED REALISTIC WAX SEAL BUTTON --- */
-        #final-heart-btn-container { text-align: center; width: 100%; padding: 30px 0; }
+        /* --- FIXED OPENED STATE --- */
+        .envelope-opened .flap { transform: rotateX(180deg); z-index: 1; }
         
+        .envelope-opened #letter-container { 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 80vh; 
+            width: 90vw;
+            max-width: 550px;
+            overflow-y: auto;
+            z-index: 500;
+            padding: 50px 30px;
+            display: block;
+        }
+        .envelope-opened .letter-text { opacity: 0.95; }
+
+        /* --- SEAL --- */
+        #seal-container {
+            position: absolute;
+            top: 110px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: opacity 0.5s ease;
+        }
+
         #final-heart-btn { 
             display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            align-items: center; justify-content: center;
             background-color: #8b0000; 
-            border: none; 
-            cursor: pointer; 
-            width: 85px;
-            height: 85px;
+            border: none; cursor: pointer; 
+            width: 85px; height: 85px;
             border-radius: 50%;
             position: relative;
-            /* Marbled Wax Texture */
             background-image: 
                 radial-gradient(circle at 30% 30%, #b30000 0%, #8b0000 50%, #5a0000 100%),
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.25'/%3E%3C/svg%3E");
-            box-shadow: 
-                0 10px 20px rgba(0,0,0,0.7),
-                inset 2px 2px 5px rgba(255,255,255,0.2),
-                inset -5px -5px 15px rgba(0,0,0,0.6);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 5;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.7), inset 2px 2px 5px rgba(255,255,255,0.2);
+            transition: transform 0.3s;
         }
 
-        /* The irregular molten rim - Gooey effect */
         #final-heart-btn::before {
-            content: '';
-            position: absolute;
-            top: -12px; left: -12px; right: -12px; bottom: -12px;
+            content: ''; position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
             background: #8b0000;
             border-radius: 42% 58% 40% 60% / 55% 45% 65% 35%;
             z-index: -1;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
             background-image: radial-gradient(circle at 50% 50%, #9e0000, #630000);
-            filter: blur(0.5px);
         }
 
-        /* The Stamped Heart Impression - Larger and Deeper */
         .seal-impression {
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             background-color: rgba(40, 0, 0, 0.6);
             mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center;
             -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center;
-            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.8), 1px 1px 1px rgba(255,255,255,0.1);
         }
 
-        #final-heart-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
-        #final-heart-btn:active { transform: scale(0.95); }
+        #final-gift-link-container { text-align: center; width: 100%; padding: 20px 0; display: none; }
+        #final-gift-btn { background: #8b0000; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; }
 
         .floating-heart { position: absolute; color: rgba(255, 51, 153, 0.15); font-size: 20px; pointer-events: none; z-index: 5; animation: floatUp linear forwards; }
         @keyframes floatUp { from { transform: translateY(110vh) scale(0.5); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.6; } to { transform: translateY(-10vh) scale(1.2); opacity: 0; } }
@@ -164,12 +209,20 @@
             </div>
         </div>
 
-        <div id="letter-container">
-            <div class="letter-text">hmm..still under construction.. editingg...​</div>
-            <div id="final-heart-btn-container">
-                 <button id="final-heart-btn" onclick="window.location.href='https://xxllavenderlloverxx.github.io/ForMyFavPerson/'">
+        <div id="envelope-wrapper">
+            <div id="seal-container">
+                <button id="final-heart-btn" onclick="openEnvelope()">
                     <div class="seal-impression"></div>
-                 </button>
+                </button>
+            </div>
+            <div class="envelope">
+                <div class="flap"></div>
+                <div id="letter-container">
+                    <div class="letter-text">Hey babyy<3 Happy Birthday!~ congrats on completing yet another cycle around the sun hehe my loverboy finally turned 23 years old~ i really appreciate to be part of your birthday this year and hopefully more to come, i will make sure to try my best to make each as special as you are to my heart ♡ i just wanna start off saying that you really mean alot to me..like seriously never have i ever been this obsessive over someone. the urge to constantly to talk with you all the time non-stop, craving your attention solely on me even if it meant doing stuff i never once imagined myself doing ever, not even to myself alone but i did it for you cuz i just love you too much. you got me so greedy, wanting all your thoughts to be consumed by me alone, all your time should be spent on me and just me alone, texting you for hours and hours even if it meant that i will wake up tired as hell the day after but that doesn't matter in the slightest cuz i got to spend time with my favourite person~♡ i promise you, you already consume my mind almost all the time daily, i can barely focus on my studies without thinking of you. wondering what we could be like. what could you possibly be doing right now. if maybe you're thinking of me as well. also remembering our time together whether it's old chats.. our voice calls.. your face when you notice me staring during video calls.. your snaps sent to me.. god i just absolutely adore everything between us that i don't think i can ever have enougghhh!! and do you have any idea how much my heart beats even more to you whenever you assure me that you chose me? when you say that it's me that you want. that i'm yours. i just so love that i finally get to call you minee and can't wait for the day when i can finally call you my husband and for you to call me your wife inshallah hehe ♡ i swear i really love that we have so much in common, that's one of the reason i thought maybe you're not like other guys afterall. no, you're different.. totally different than anyone i ever met.. no other guy could ever reach a fraction of your personality, just how honest and caring and respectful you are toward me and that just made me cherish you more, loving you more- i admit at start i was so against any type of dating, i thought it's easier to just give up on finding a good man and to just focus on myself. i believed all men are just the same and hated them equally. maybe i will grow up living with my pets that i can play with when im back from work and just have a peaceful life.. i did feel upset that i won't get to share this life with someone but i just accepted it that it's for the best. but i swear you proved to me that maybe not all men are the same.. sure at start i still doubted you and your intentions, about whether your words were even truthful at all or just another copy paste from one girl to another.. just using me as a temporary distraction like many guys do lately. i really didn't think much of our time together at start nor that it will go any deeper.. but god you slowly got me falling for you harder and harder by each text from you.. and showing how much you care for me just gets me melting for you.. you got me to start thinking.. maybe online dating won't be so bad. who know, it could work out this time and god i really hope it does! i pray alot that we will be together, that my parents will agree for you to be mine, that we will meet sooner than i thinkk.. i just want you alone so bad to be mine forever and to have you all to myself. i just wanna thank you so much for being my everything, for being there when i needed comfort when im feeling stressed, for making me smile when im at my lowest, supporting me always, always so patient with me, and most importantly for choosing me, i feel so lucky i swear to have someone like you ♡ and i'm really sorry for ever upsetting you or not showing you my appreciation as much as you do to me.. but please never doubt my love for you, i hope you realize this letter is proof of my burning desire for you alone. and don't forget i promised you that i will always stay by your side. i don't care how mad i get towards you but i promised i will eventually go back to you..~ i just love you so damn much. way too much sometimes. and this letter- is my way of showing you what truly goes on in my heart ♡ Happy Birthday, my sweet darling <3</div>
+                    <div id="final-gift-link-container">
+                        <button id="final-gift-btn" onclick="window.location.href='https://xxllavenderlloverxx.github.io/ForMyFavPerson/'">psstt.. click mee🥰</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -177,12 +230,13 @@
     </div>
 
     <script>
-        const targetDate = new Date("2026-04-30T17:02:00Z").getTime(); 
+        // Updated for 3:10 PM Egypt Time (UTC+3 for 2026 EEST)
+        const targetDate = new Date("2026-05-01T15:10:00+03:00").getTime(); 
 
         const lockScreen = document.getElementById('lock-screen');
         const timerText = document.getElementById('timer-text');
         const mainWrapper = document.getElementById('main-wrapper');
-        const letterBox = document.getElementById('letter-container');
+        const envelopeWrapper = document.getElementById('envelope-wrapper');
 
         function updateCountdown() {
             const now = new Date().getTime();
@@ -201,6 +255,15 @@
         }
 
         updateCountdown();
+
+        function openEnvelope() {
+            envelopeWrapper.classList.add('envelope-opened');
+            document.getElementById('seal-container').style.opacity = '0';
+            setTimeout(() => { 
+                document.getElementById('seal-container').style.display = 'none';
+                document.getElementById('final-gift-link-container').style.display = 'block';
+            }, 800);
+        }
 
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
@@ -226,11 +289,11 @@
         let columns, drops;
         let frameCount = 0;
         const rainSlowdown = 4; 
-        const messages = ["3", "2", "1", "HAPPY", "BIRTHDAY", "TO", "YOU~"];
+        const messages = ["3", "2", "1", "HAPPY", "BIRTHDAY", "TO", "YOU", "<3"];
         let state = 0;
         let stateTimer = 0;
         const messageDuration = 140; 
-        let letterTriggered = false;
+        let envelopeTriggered = false;
 
         let fireworks = [];
         class Firework {
@@ -309,11 +372,11 @@
             }
         }
 
-        function showLetter() {
-            if (letterTriggered) return;
-            letterTriggered = true;
-            letterBox.style.display = 'block';
-            setTimeout(() => { letterBox.style.opacity = '1'; }, 100);
+        function showEnvelope() {
+            if (envelopeTriggered) return;
+            envelopeTriggered = true;
+            envelopeWrapper.style.display = 'block';
+            setTimeout(() => { envelopeWrapper.style.opacity = '1'; }, 100);
         }
 
         function draw() {
@@ -346,7 +409,7 @@
                 if (stateTimer < 500) { 
                     stateTimer++; 
                 } else {
-                    showLetter();
+                    showEnvelope();
                 }
             }
             frameCount++; requestAnimationFrame(draw);
